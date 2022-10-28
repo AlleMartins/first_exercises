@@ -7,10 +7,12 @@ import it.unibo.collections.social.api.SocialNetworkUser;
 import it.unibo.collections.social.api.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +38,7 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      * In order to save the people followed by a user organized in groups, adopt
      * a generic-type Map:  think of what type of keys and values would best suit the requirements
      */
-
+    Map<String, Set<U>> database = new HashMap<>();
     /*
      * [CONSTRUCTORS]
      *
@@ -48,6 +50,8 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      * - username
      * - age and every other necessary field
      */
+
+
     /**
      * Builds a user participating in a social network.
      *
@@ -62,12 +66,15 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, userAge);
     }
 
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
+    public SocialNetworkUserImpl(String name, String surname, String user) {
+        super(name, surname, user);
+    }
 
     /*
      * [METHODS]
@@ -76,6 +83,12 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
+        if (database.containsKey(circle)) {
+            database.get(circle).add(user);
+        }else{
+            database.put(circle, new HashSet<>(Arrays.asList(user)));
+            return true;
+        }
         return false;
     }
 
@@ -86,11 +99,22 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
+        if (groupName != "") {
+            if (database.containsKey(groupName)) {
+                return new HashSet<>(database.get(groupName));
+            } else { 
+                return new HashSet<>();
+            }
+        } 
         return null;
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+        List<U> container = new LinkedList<>();
+        for (String controllo : database.keySet()) {
+            container.addAll(database.get(controllo));
+        }
+        return container;
     }
 }
